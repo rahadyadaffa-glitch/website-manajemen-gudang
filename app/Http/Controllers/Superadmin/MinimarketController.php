@@ -145,6 +145,17 @@ class MinimarketController extends Controller
             'recent_out' => (clone $query)->where('transaction_type', 'out')->sum('quantity'),
         ];
 
+        // Calculate historical stock if date is provided
+        if ($date) {
+            $futureAll = $minimarket->inventoryTransactions()
+                ->where('created_at', '>', \Carbon\Carbon::parse($date)->endOfDay());
+            
+            $allInSince = (clone $futureAll)->where('transaction_type', 'in')->sum('quantity');
+            $allOutSince = (clone $futureAll)->where('transaction_type', 'out')->sum('quantity');
+            
+            $stats['total_stock'] = $stats['total_stock'] - $allInSince + $allOutSince;
+        }
+
         $transactions = $query->with(['product', 'user'])->latest()->take(10)->get();
 
         // Calculate 30-day trend data for THIS minimarket
