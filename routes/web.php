@@ -42,9 +42,17 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
 Route::middleware(['auth', 'role:admin', 'minimarket.access'])->prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
-    Route::get('/users', fn () => 'Manage Users')->name('users.index');
-    Route::get('/inventory', fn () => 'Inventory Approval')->name('inventory.index');
-    Route::get('/reports', fn () => 'Store Reports')->name('reports.index');
+    
+    // Approval Routes
+    Route::get('/approvals', [\App\Http\Controllers\Admin\ApprovalController::class, 'index'])->name('approvals.index');
+    Route::post('/approvals/{transaction}/approve', [\App\Http\Controllers\Admin\ApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::post('/approvals/{transaction}/reject', [\App\Http\Controllers\Admin\ApprovalController::class, 'reject'])->name('approvals.reject');
+
+    // User Management Routes
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+
+    // Audit Trail Routes
+    Route::get('/audit-trail', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit.index');
 });
 
 Route::middleware(['auth', 'role:user', 'minimarket.access'])->prefix('user')->name('user.')->group(function (): void {
@@ -54,4 +62,5 @@ Route::middleware(['auth', 'role:user', 'minimarket.access'])->prefix('user')->n
     Route::get('/input-barang-keluar', [\App\Http\Controllers\User\InventoryInputController::class, 'createKeluar'])->name('input.keluar.create');
     Route::post('/input-barang-keluar', [\App\Http\Controllers\User\InventoryInputController::class, 'storeKeluar'])->name('input.keluar.store');
     Route::get('/history', fn () => 'History')->name('history.index');
+    Route::get('/api/products', [\App\Http\Controllers\User\InventoryInputController::class, 'getProducts'])->name('api.products');
 });

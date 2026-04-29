@@ -9,16 +9,31 @@
             <form action="{{ route('user.input.masuk.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Utama</label>
+                        <select id="parent_category_id" onchange="handleParentChange()" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            <option value="">Semua Kategori</option>
+                            @foreach($categories as $parent)
+                                <option value="{{ $parent->id }}">{{ strtoupper($parent->name) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sub-Kategori</label>
+                        <select id="category_id" onchange="fetchProducts()" disabled 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all opacity-50 cursor-not-allowed">
+                            <option value="">Pilih Kategori Utama Dulu</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="mb-6">
-                    <label for="product_id" class="block text-sm font-medium text-gray-700 mb-2">Pilih Produk</label>
+                    <label for="product_id" class="block text-sm font-medium text-gray-700 mb-2">Pilih Produk <span id="loading-products" class="hidden text-blue-500 text-xs ml-2">Memuat...</span></label>
                     <select name="product_id" id="product_id" required 
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all select2">
-                        <option value="">Cari Produk (Nama atau SKU)...</option>
-                        @foreach($products as $product)
-                            <option value="{{ $product->id }}">
-                                {{ $product->name }} ({{ $product->sku }})
-                            </option>
-                        @endforeach
+                        <option value="">Cari produk...</option>
                     </select>
                     @error('product_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
@@ -62,4 +77,81 @@
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        const categoryData = @json($categories);
+
+        function handleParentChange() {
+            const parentId = document.getElementById('parent_category_id').value;
+            const subSelect = document.getElementById('category_id');
+            
+            subSelect.innerHTML = '<option value="">Semua Sub-Kategori</option>';
+            
+            if (parentId) {
+                const parent = categoryData.find(c => c.id === parentId);
+                if (parent && parent.children) {
+                    parent.children.forEach(child => {
+                        const opt = document.createElement('option');
+                        opt.value = child.id;
+                        opt.text = child.name.toUpperCase();
+                        subSelect.add(opt);
+                    });
+                }
+                subSelect.disabled = false;
+                subSelect.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                subSelect.disabled = true;
+                subSelect.classList.add('opacity-50', 'cursor-not-allowed');
+                subSelect.innerHTML = '<option value="">Pilih Kategori Utama Dulu</option>';
+            }
+
+            fetchProducts();
+        }
+
+        function fetchProducts() {
+            const categoryId = document.getElementById('category_id').value;
+            const productSelect = document.getElementById('product_id');
+            const loading = document.getElementById('loading-products');
+            
+            loading.classList.remove('hidden');
+            productSelect.innerHTML = '<option value="">Memuat produk...</option>';
+            
+            fetch(`{{ route('user.api.products') }}?category_id=${categoryId}`)
+                .then(res => res.json())
+                .then(products => {
+                    productSelect.innerHTML = '<option value="">Cari produk (Nama atau SKU)...</option>';
+                    products.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.text = `${p.name} (${p.sku})`;
+                        productSelect.add(opt);
+                    });
+                    loading.classList.add('hidden');
+                    // Refresh select2 if initialized
+                    if(typeof jQuery !== 'undefined' && jQuery(productSelect).hasClass('select2-hidden-accessible')) {
+                        jQuery(productSelect).trigger('change');
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed fetching products', err);
+                    loading.classList.add('hidden');
+                    productSelect.innerHTML = '<option value="">Gagal memuat. Silakan muat ulang.</option>';
+                });
+        }
+
+        // initial fetch on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize select2 with a custom matcher or default
+            if(typeof jQuery !== 'undefined') {
+                $('#product_id').select2({
+                    placeholder: "Cari produk (Nama atau SKU)...",
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+            fetchProducts();
+        });
+    </script>
+    @endpush
 </x-app-layout>

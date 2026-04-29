@@ -80,7 +80,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    Master Produk
+                    Kelola Produk
                 </a>
                 <a href="{{ route('admin.users.index') }}"
                     class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/users*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
@@ -91,23 +91,23 @@
                     </svg>
                     Kelola User
                 </a>
-                <a href="{{ route('admin.inventory.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/inventory*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/inventory*') ? 'text-blue-600' : 'text-gray-400' }}"
+                <a href="{{ route('admin.approvals.index') }}"
+                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/approvals*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/approvals*') ? 'text-blue-600' : 'text-gray-400' }}"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                     Approval Stok
                 </a>
-                <a href="{{ route('admin.reports.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/reports*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/reports*') ? 'text-blue-600' : 'text-gray-400' }}"
+                <a href="{{ route('admin.audit.index') }}"
+                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->routeIs('admin.audit.index') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.audit.index') ? 'text-blue-600' : 'text-gray-400' }}"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 17v-2m3 2v-4m3 2v-6m10 10V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2z" />
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Laporan Minimarket
+                    Audit Trail
                 </a>
             @endif
 

@@ -13,8 +13,29 @@ class InventoryInputController extends Controller
 {
     public function create()
     {
-        $products = Product::orderBy('name')->get();
-        return view('user.inventory.masuk', compact('products'));
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        return view('user.inventory.masuk', compact('categories'));
+    }
+
+    public function getProducts(Request $request)
+    {
+        $query = Product::query();
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
+        $products = $query->orderBy('name')->get();
+
+        return response()->json($products);
     }
 
     public function store(Request $request)
@@ -31,14 +52,14 @@ class InventoryInputController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Create Transaction
+            // 1. Create Transaction (Status set to pending, to be approved by admin)
             $transaction = InventoryTransaction::create([
                 'minimarket_id' => $user->minimarket_id,
                 'product_id' => $validated['product_id'],
                 'user_id' => $user->id,
                 'transaction_type' => 'in',
                 'quantity' => $validated['quantity'],
-                'status' => 'completed',
+                'status' => 'pending',
                 'notes' => $validated['notes'],
             ]);
 
@@ -47,30 +68,23 @@ class InventoryInputController extends Controller
                 $transaction->update(['proof_image_path' => $path]);
             }
 
-            // 2. Update Inventory
-            $inventory = InventoryItem::firstOrCreate(
-                ['minimarket_id' => $user->minimarket_id, 'product_id' => $validated['product_id']],
-                ['quantity' => 0, 'last_updated' => now()]
-            );
-
-            $inventory->increment('quantity', $validated['quantity']);
-            $inventory->update(['last_updated' => now()]);
+            // INVENTORY UPDATE REMOVED: Now handled by Admin Approval
 
             DB::commit();
 
             return redirect()->route('user.dashboard')
-                ->with('success', 'Barang masuk berhasil dicatat.');
+                ->with('success', 'Barang masuk telah diajukan dan menunggu persetujuan admin.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mencatat transaksi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengajukan transaksi: ' . $e->getMessage());
         }
     }
 
     public function createKeluar()
     {
-        $products = Product::orderBy('name')->get();
-        return view('user.inventory.keluar', compact('products'));
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+        return view('user.inventory.keluar', compact('categories'));
     }
 
     public function storeKeluar(Request $request)
@@ -96,14 +110,14 @@ class InventoryInputController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Create Transaction
+            // 1. Create Transaction (Status set to pending, to be approved by admin)
             $transaction = InventoryTransaction::create([
                 'minimarket_id' => $user->minimarket_id,
                 'product_id' => $validated['product_id'],
                 'user_id' => $user->id,
                 'transaction_type' => 'out',
                 'quantity' => $validated['quantity'],
-                'status' => 'completed',
+                'status' => 'pending',
                 'notes' => $validated['notes'],
             ]);
 
@@ -112,18 +126,16 @@ class InventoryInputController extends Controller
                 $transaction->update(['proof_image_path' => $path]);
             }
 
-            // 2. Update Inventory
-            $inventory->decrement('quantity', $validated['quantity']);
-            $inventory->update(['last_updated' => now()]);
+            // INVENTORY UPDATE REMOVED: Now handled by Admin Approval
 
             DB::commit();
 
             return redirect()->route('user.dashboard')
-                ->with('success', 'Barang keluar berhasil dicatat.');
+                ->with('success', 'Barang keluar telah diajukan dan menunggu persetujuan admin.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mencatat transaksi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengajukan transaksi: ' . $e->getMessage());
         }
     }
 }

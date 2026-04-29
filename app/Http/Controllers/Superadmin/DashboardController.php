@@ -84,7 +84,8 @@ class DashboardController extends Controller
         }
 
         $minimarkets = Minimarket::with('admin')->get();
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
-        return view('superadmin.dashboard', compact('stats', 'recent_activities', 'minimarkets', 'chart_data'));
+        return view('superadmin.dashboard', compact('stats', 'recent_activities', 'minimarkets', 'chart_data', 'categories'));
     }
 }
