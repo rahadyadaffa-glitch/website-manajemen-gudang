@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Minimarket;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,22 +15,23 @@ class UserGudangSeeder extends Seeder
      */
     public function run(): void
     {
-        $minimarket = Minimarket::query()->where('code', 'MM001')->first();
+        $userRole = Role::where('name', 'user')->first();
+        $markets = Minimarket::all();
 
-        if (! $minimarket) {
-            return;
+        foreach ($markets as $market) {
+            $suffix = strtolower(str_replace('Supermarket ', '', $market->name));
+            
+            User::updateOrCreate(
+                ['email' => "user_$suffix@warehouse.com"],
+                [
+                    'name' => "User " . ucfirst($suffix),
+                    'username' => "user_$suffix",
+                    'password' => Hash::make('password'),
+                    'role_id' => $userRole->id,
+                    'minimarket_id' => $market->id,
+                    'is_active' => true,
+                ]
+            );
         }
-
-        User::query()->updateOrCreate(
-            ['email' => 'user@warehouse.com'],
-            [
-                'name' => 'User Gudang',
-                'username' => 'usergudang',
-                'password' => Hash::make('password'),
-                'role_id' => 3,
-                'minimarket_id' => $minimarket->id,
-                'is_active' => true,
-            ]
-        );
     }
 }

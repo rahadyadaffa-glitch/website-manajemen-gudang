@@ -12,16 +12,38 @@ class MinimarketSeeder extends Seeder
      */
     public function run(): void
     {
-        Minimarket::query()->updateOrCreate(
-            ['code' => 'MM001'],
+        $markets = [
             [
-                'name' => 'Minimarket Demo 01',
-                'address' => 'Jl. Contoh No. 1',
+                'code' => 'CAHAYA',
+                'name' => 'Supermarket Cahaya',
+                'address' => 'Jl. Cahaya No. 1',
                 'city' => 'Yogyakarta',
                 'province' => 'DI Yogyakarta',
-                'phone' => '081234567890',
+                'phone' => '081234567891',
                 'status' => 'active',
-            ]
-        );
+            ],
+            [
+                'code' => 'BINTANG',
+                'name' => 'Supermarket Bintang',
+                'address' => 'Jl. Bintang No. 2',
+                'city' => 'Yogyakarta',
+                'province' => 'DI Yogyakarta',
+                'phone' => '081234567892',
+                'status' => 'active',
+            ],
+            [
+                'code' => 'BULAN',
+                'name' => 'Supermarket Bulan',
+                'address' => 'Jl. Bulan No. 3',
+                'city' => 'Yogyakarta',
+                'province' => 'DI Yogyakarta',
+                'phone' => '081234567893',
+                'status' => 'active',
+            ],
+        ];
+
+        foreach ($markets as $market) {
+            Minimarket::updateOrCreate(['code' => $market['code']], $market);
+        }
     }
 }

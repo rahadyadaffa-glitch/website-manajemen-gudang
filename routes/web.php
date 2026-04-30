@@ -61,6 +61,6 @@ Route::middleware(['auth', 'role:user', 'minimarket.access'])->prefix('user')->n
     Route::post('/input-barang-masuk', [\App\Http\Controllers\User\InventoryInputController::class, 'store'])->name('input.masuk.store');
     Route::get('/input-barang-keluar', [\App\Http\Controllers\User\InventoryInputController::class, 'createKeluar'])->name('input.keluar.create');
     Route::post('/input-barang-keluar', [\App\Http\Controllers\User\InventoryInputController::class, 'storeKeluar'])->name('input.keluar.store');
-    Route::get('/history', fn () => 'History')->name('history.index');
+    Route::get('/history', [\App\Http\Controllers\User\InventoryInputController::class, 'history'])->name('history.index');
     Route::get('/api/products', [\App\Http\Controllers\User\InventoryInputController::class, 'getProducts'])->name('api.products');
 });

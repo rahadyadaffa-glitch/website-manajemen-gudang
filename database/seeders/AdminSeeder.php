@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Minimarket;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,22 +15,23 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $minimarket = Minimarket::query()->where('code', 'MM001')->first();
+        $adminRole = Role::where('name', 'admin')->first();
+        $markets = Minimarket::all();
 
-        if (! $minimarket) {
-            return;
+        foreach ($markets as $market) {
+            $suffix = strtolower(str_replace('Supermarket ', '', $market->name));
+            
+            User::updateOrCreate(
+                ['email' => "admin_$suffix@warehouse.com"],
+                [
+                    'name' => "Admin " . ucfirst($suffix),
+                    'username' => "admin_$suffix",
+                    'password' => Hash::make('password'),
+                    'role_id' => $adminRole->id,
+                    'minimarket_id' => $market->id,
+                    'is_active' => true,
+                ]
+            );
         }
-
-        User::query()->updateOrCreate(
-            ['email' => 'admin@warehouse.com'],
-            [
-                'name' => 'Admin Minimarket',
-                'username' => 'adminmm',
-                'password' => Hash::make('password'),
-                'role_id' => 2,
-                'minimarket_id' => $minimarket->id,
-                'is_active' => true,
-            ]
-        );
     }
 }

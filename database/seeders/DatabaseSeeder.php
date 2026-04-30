@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             SuperadminSeeder::class,
             AdminSeeder::class,
             UserGudangSeeder::class,
-            DummyDataSeeder::class,
+            CategoryHierarchySeeder::class,
         ]);
     }
 }

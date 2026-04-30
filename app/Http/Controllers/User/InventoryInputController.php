@@ -20,6 +20,15 @@ class InventoryInputController extends Controller
     public function getProducts(Request $request)
     {
         $query = Product::query();
+        $user = auth()->user();
+
+        // If type is 'out', only show products that exist in the minimarket's inventory
+        if ($request->type === 'out') {
+            $query->whereHas('inventoryItems', function($q) use ($user) {
+                $q->where('minimarket_id', $user->minimarket_id)
+                  ->where('quantity', '>', 0);
+            });
+        }
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
@@ -44,8 +53,11 @@ class InventoryInputController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
+            'custom_notes' => 'nullable|string|required_if:notes,Lainnya',
             'proof_image' => 'nullable|image|max:2048',
         ]);
+
+        $finalNotes = $validated['notes'] === 'Lainnya' ? $validated['custom_notes'] : $validated['notes'];
 
         $user = auth()->user();
 
@@ -60,7 +72,7 @@ class InventoryInputController extends Controller
                 'transaction_type' => 'in',
                 'quantity' => $validated['quantity'],
                 'status' => 'pending',
-                'notes' => $validated['notes'],
+                'notes' => $finalNotes,
             ]);
 
             if ($request->hasFile('proof_image')) {
@@ -93,8 +105,11 @@ class InventoryInputController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
+            'custom_notes' => 'nullable|string|required_if:notes,Lainnya',
             'proof_image' => 'nullable|image|max:2048',
         ]);
+
+        $finalNotes = $validated['notes'] === 'Lainnya' ? $validated['custom_notes'] : $validated['notes'];
 
         $user = auth()->user();
 
@@ -118,7 +133,7 @@ class InventoryInputController extends Controller
                 'transaction_type' => 'out',
                 'quantity' => $validated['quantity'],
                 'status' => 'pending',
-                'notes' => $validated['notes'],
+                'notes' => $finalNotes,
             ]);
 
             if ($request->hasFile('proof_image')) {
@@ -137,5 +152,14 @@ class InventoryInputController extends Controller
             DB::rollBack();
             return back()->with('error', 'Gagal mengajukan transaksi: ' . $e->getMessage());
         }
+    }
+    public function history()
+    {
+        $transactions = auth()->user()->inventoryTransactions()
+            ->with(['product', 'minimarket'])
+            ->latest()
+            ->paginate(15);
+
+        return view('user.history.index', compact('transactions'));
     }
 }

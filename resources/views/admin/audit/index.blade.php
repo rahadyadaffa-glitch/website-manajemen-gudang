@@ -55,7 +55,7 @@
 
                     <!-- Tiered Category Filter -->
                     <select id="parent-category-filter" onchange="handleParentChange()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px]">
+                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px] select2">
                         <option value="">SEMUA KATEGORI</option>
                         @foreach($categories as $parent)
                             <option value="{{ $parent->id }}" {{ request('parent_category_id') == $parent->id ? 'selected' : '' }}>
@@ -65,8 +65,7 @@
                     </select>
 
                     <select id="sub-category-filter" onchange="fetchLogs()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px] {{ !request('parent_category_id') ? 'opacity-50' : '' }}"
-                        {{ !request('parent_category_id') ? 'disabled' : '' }}>
+                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px] select2">
                         <option value="">SEMUA SUB-KATEGORI</option>
                         @if(request('parent_category_id'))
                             @php $selParent = $categories->firstWhere('id', request('parent_category_id')); @endphp
@@ -109,6 +108,7 @@
                         <th class="px-6 py-4">Petugas</th>
                         <th class="px-6 py-4 text-center">Aktivitas</th>
                         <th class="px-6 py-4 text-right">Jumlah</th>
+                        <th class="px-6 py-4">Catatan</th>
                         <th class="px-6 py-4 text-center">Status</th>
                     </tr>
                 </thead>
@@ -154,14 +154,24 @@
                         subSelect.add(opt);
                     });
                 }
-                subSelect.disabled = false;
-                subSelect.classList.remove('opacity-50');
-            } else {
-                subSelect.disabled = true;
-                subSelect.classList.add('opacity-50');
             }
+
+            // Refresh Select2 for sub-category
+            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                jQuery(subSelect).trigger('change');
+            }
+
             fetchLogs();
         }
+
+        // Initialize Select2 on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof jQuery !== 'undefined') {
+                $('.select2').select2({
+                    width: 'resolve'
+                });
+            }
+        });
 
         function updateDateFilter(date) {
             currentFilters.date = date;

@@ -13,7 +13,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Utama</label>
                         <select id="parent_category_id" onchange="handleParentChange()" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all select2">
                             <option value="">Semua Kategori</option>
                             @foreach($categories as $parent)
                                 <option value="{{ $parent->id }}">{{ strtoupper($parent->name) }}</option>
@@ -22,9 +22,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Sub-Kategori</label>
-                        <select id="category_id" onchange="fetchProducts()" disabled 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all opacity-50 cursor-not-allowed">
-                            <option value="">Pilih Kategori Utama Dulu</option>
+                        <select id="category_id" onchange="fetchProducts()" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all select2">
+                            <option value="">Semua Sub-Kategori</option>
                         </select>
                     </div>
                 </div>
@@ -56,11 +56,24 @@
                 </div>
 
                 <div class="mb-8">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Catatan Tambahan</label>
-                    <textarea name="notes" id="notes" rows="3" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="Contoh: Dari Supplier PT XYZ, Kondisi Baik"></textarea>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Alasan Masuk</label>
+                    <select name="notes" id="notes" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all select2">
+                        <option value="">Pilih Alasan Masuk...</option>
+                        <option value="Stok Baru (Supplier)">Stok Baru (Supplier)</option>
+                        <option value="Retur dari Customer">Retur dari Customer</option>
+                        <option value="Koreksi Stok (Tambah)">Koreksi Stok (Tambah)</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                     @error('notes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div id="custom-notes-wrapper" class="mb-8 hidden">
+                    <label for="custom_notes" class="block text-sm font-medium text-gray-700 mb-2">Sebutkan Alasan Lainnya</label>
+                    <textarea name="custom_notes" id="custom_notes" rows="3" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Tuliskan alasan lengkap..."></textarea>
+                    @error('custom_notes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex items-center justify-between pt-6 border-t border-gray-100">
@@ -98,12 +111,11 @@
                         subSelect.add(opt);
                     });
                 }
-                subSelect.disabled = false;
-                subSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                subSelect.disabled = true;
-                subSelect.classList.add('opacity-50', 'cursor-not-allowed');
-                subSelect.innerHTML = '<option value="">Pilih Kategori Utama Dulu</option>';
+            }
+
+            // Refresh Select2 for sub-category
+            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                jQuery(subSelect).trigger('change');
             }
 
             fetchProducts();
@@ -142,12 +154,22 @@
 
         // initial fetch on load
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize select2 with a custom matcher or default
             if(typeof jQuery !== 'undefined') {
-                $('#product_id').select2({
-                    placeholder: "Cari produk (Nama atau SKU)...",
-                    allowClear: true,
+                $('.select2').select2({
                     width: '100%'
+                });
+
+                // Listen for 'notes' change for "Lainnya"
+                $('#notes').on('change', function() {
+                    const wrapper = document.getElementById('custom-notes-wrapper');
+                    const customInput = document.getElementById('custom_notes');
+                    if (this.value === 'Lainnya') {
+                        wrapper.classList.remove('hidden');
+                        customInput.required = true;
+                    } else {
+                        wrapper.classList.add('hidden');
+                        customInput.required = false;
+                    }
                 });
             }
             fetchProducts();

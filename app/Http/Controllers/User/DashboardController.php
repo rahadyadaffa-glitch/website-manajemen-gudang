@@ -12,8 +12,11 @@ class DashboardController extends Controller
         $minimarket = auth()->user()->minimarket;
 
         $stats = [
-            'my_transactions_today' => 5,
-            'total_items' => 450,
+            'my_transactions_today' => auth()->user()->inventoryTransactions()
+                ->whereDate('created_at', now()->toDateString())
+                ->count(),
+            'total_items' => auth()->user()->minimarket->inventoryItems()
+                ->sum('quantity'),
         ];
 
         return view('user.dashboard', compact('minimarket', 'stats'));

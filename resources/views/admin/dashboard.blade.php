@@ -82,7 +82,7 @@
                     <input type="hidden" name="chart_range" value="{{ request('chart_range', '7') }}">
                     
                     <select id="parent-category-filter" name="parent_category_id" onchange="handleParentChange()" 
-                        class="bg-gray-100 border-none rounded-xl text-xs font-black text-gray-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[180px]">
+                        class="bg-gray-100 border-none rounded-xl text-xs font-black text-gray-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[180px] select2">
                         <option value="">SEMUA KATEGORI</option>
                         @foreach($categories as $parent)
                             <option value="{{ $parent->id }}" {{ request('parent_category_id') == $parent->id ? 'selected' : '' }}>
@@ -92,8 +92,7 @@
                     </select>
 
                     <select id="sub-category-filter" name="category_id" onchange="this.form.submit()" 
-                        class="bg-gray-100 border-none rounded-xl text-xs font-black text-gray-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[180px] {{ !request('parent_category_id') ? 'opacity-50' : '' }}"
-                        {{ !request('parent_category_id') ? 'disabled' : '' }}>
+                        class="bg-gray-100 border-none rounded-xl text-xs font-black text-gray-600 px-4 py-2 focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[180px] select2">
                         <option value="">SEMUA SUB-KATEGORI</option>
                         @if(request('parent_category_id'))
                             @php $selParent = $categories->firstWhere('id', request('parent_category_id')); @endphp
@@ -193,16 +192,18 @@
             const parentId = document.getElementById('parent-category-filter').value;
             const subSelect = document.getElementById('sub-category-filter');
             
+            subSelect.innerHTML = '<option value="">SEMUA SUB-KATEGORI</option>';
+
             if (!parentId) {
-                subSelect.disabled = true;
-                subSelect.innerHTML = '<option value="">SEMUA SUB-KATEGORI</option>';
-                subSelect.classList.add('opacity-50');
+                // Refresh Select2 for sub-category
+                if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                    jQuery(subSelect).trigger('change');
+                }
                 document.getElementById('trend-filter-form').submit();
                 return;
             }
 
             const parent = categoryData.find(c => c.id === parentId);
-            subSelect.innerHTML = '<option value="">SEMUA SUB-KATEGORI</option>';
             if (parent && parent.children) {
                 parent.children.forEach(child => {
                     const opt = document.createElement('option');
@@ -211,10 +212,23 @@
                     subSelect.add(opt);
                 });
             }
-            subSelect.disabled = false;
-            subSelect.classList.remove('opacity-50');
+
+            // Refresh Select2 for sub-category
+            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                jQuery(subSelect).trigger('change');
+            }
+
             document.getElementById('trend-filter-form').submit();
         }
+
+        // Initialize Select2 on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof jQuery !== 'undefined') {
+                $('.select2').select2({
+                    width: 'resolve'
+                });
+            }
+        });
 
         const ctx = document.getElementById('inventoryChart').getContext('2d');
         

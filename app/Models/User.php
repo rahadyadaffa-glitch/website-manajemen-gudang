@@ -72,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->role?->name === 'user';
     }
+
+    public function inventoryTransactions()
+    {
+        return $this->hasMany(InventoryTransaction::class);
+    }
 }

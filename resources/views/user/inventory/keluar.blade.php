@@ -13,7 +13,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Utama</label>
                         <select id="parent_category_id" onchange="handleParentChange()" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all select2">
                             <option value="">Semua Kategori</option>
                             @foreach($categories as $parent)
                                 <option value="{{ $parent->id }}">{{ strtoupper($parent->name) }}</option>
@@ -22,9 +22,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Sub-Kategori</label>
-                        <select id="category_id" onchange="fetchProducts()" disabled 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all opacity-50 cursor-not-allowed">
-                            <option value="">Pilih Kategori Utama Dulu</option>
+                        <select id="category_id" onchange="fetchProducts()" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all select2">
+                            <option value="">Semua Sub-Kategori</option>
                         </select>
                     </div>
                 </div>
@@ -57,10 +57,25 @@
 
                 <div class="mb-8">
                     <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Alasan Keluar</label>
-                    <textarea name="notes" id="notes" rows="3" required 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                        placeholder="Sebutkan alasan: Rusak saat bongkar muat, Expired, Retur supplier, dll."></textarea>
+                    <select name="notes" id="notes" required 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all select2">
+                        <option value="">Pilih Alasan Keluar...</option>
+                        <option value="Barang Rusak">Barang Rusak</option>
+                        <option value="Barang Expired">Barang Expired</option>
+                        <option value="Retur ke Supplier">Retur ke Supplier</option>
+                        <option value="Koreksi Stok (Kurang)">Koreksi Stok (Kurang)</option>
+                        <option value="Operasional Toko">Operasional Toko</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
                     @error('notes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                <div id="custom-notes-wrapper" class="mb-8 hidden">
+                    <label for="custom_notes" class="block text-sm font-medium text-gray-700 mb-2">Sebutkan Alasan Lainnya</label>
+                    <textarea name="custom_notes" id="custom_notes" rows="3" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                        placeholder="Tuliskan alasan lengkap..."></textarea>
+                    @error('custom_notes') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex items-center justify-between pt-6 border-t border-gray-100">
@@ -98,12 +113,11 @@
                         subSelect.add(opt);
                     });
                 }
-                subSelect.disabled = false;
-                subSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                subSelect.disabled = true;
-                subSelect.classList.add('opacity-50', 'cursor-not-allowed');
-                subSelect.innerHTML = '<option value="">Pilih Kategori Utama Dulu</option>';
+            }
+
+            // Refresh Select2 for sub-category
+            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                jQuery(subSelect).trigger('change');
             }
 
             fetchProducts();
@@ -117,7 +131,7 @@
             loading.classList.remove('hidden');
             productSelect.innerHTML = '<option value="">Memuat produk...</option>';
             
-            fetch(`{{ route('user.api.products') }}?category_id=${categoryId}`)
+            fetch(`{{ route('user.api.products') }}?category_id=${categoryId}&type=out`)
                 .then(res => res.json())
                 .then(products => {
                     productSelect.innerHTML = '<option value="">Cari produk (Nama atau SKU)...</option>';
@@ -143,10 +157,21 @@
         // initial fetch on load
         document.addEventListener('DOMContentLoaded', () => {
             if(typeof jQuery !== 'undefined') {
-                $('#product_id').select2({
-                    placeholder: "Cari produk (Nama atau SKU)...",
-                    allowClear: true,
+                $('.select2').select2({
                     width: '100%'
+                });
+
+                // Listen for 'notes' change for "Lainnya"
+                $('#notes').on('change', function() {
+                    const wrapper = document.getElementById('custom-notes-wrapper');
+                    const customInput = document.getElementById('custom_notes');
+                    if (this.value === 'Lainnya') {
+                        wrapper.classList.remove('hidden');
+                        customInput.required = true;
+                    } else {
+                        wrapper.classList.add('hidden');
+                        customInput.required = false;
+                    }
                 });
             }
             fetchProducts();

@@ -55,7 +55,7 @@
 
                     <!-- Tier 1: Parent Category -->
                     <select id="parent-category-filter" onchange="handleParentCategoryChange()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[180px]">
+                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[180px] select2">
                         <option value="">SEMUA KATEGORI</option>
                         @foreach($categories as $parent)
                             <option value="{{ $parent->id }}" {{ request('parent_category_id') == $parent->id ? 'selected' : '' }}>
@@ -66,8 +66,7 @@
 
                     <!-- Tier 2: Sub-Category -->
                     <select id="category-filter" onchange="fetchInventory()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[180px] {{ !request('parent_category_id') ? 'opacity-50 cursor-not-allowed' : '' }}"
-                        {{ !request('parent_category_id') ? 'disabled' : '' }}>
+                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[180px] select2">
                         <option value="">SEMUA SUB-KATEGORI</option>
                         @if(request('parent_category_id'))
                             @php $selectedParent = $categories->firstWhere('id', request('parent_category_id')); @endphp
@@ -148,15 +147,24 @@
                         subSelect.add(option);
                     });
                 }
-                subSelect.disabled = false;
-                subSelect.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                subSelect.disabled = true;
-                subSelect.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+
+            // Refresh Select2 for sub-category
+            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
+                jQuery(subSelect).trigger('change');
             }
 
             fetchInventory();
         }
+
+        // Initialize Select2 on load
+        document.addEventListener('DOMContentLoaded', () => {
+            if(typeof jQuery !== 'undefined') {
+                $('.select2').select2({
+                    width: 'resolve'
+                });
+            }
+        });
 
         function updateDateFilter(date) {
             currentFilters.date = date;
