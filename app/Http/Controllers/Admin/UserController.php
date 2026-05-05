@@ -10,15 +10,28 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $minimarket = auth()->user()->minimarket;
-        $users = User::where('minimarket_id', $minimarket->id)
+        $query = User::where('minimarket_id', $minimarket->id)
             ->whereHas('role', function($q) {
                 $q->where('name', 'user');
-            })
-            ->latest()
-            ->paginate(10);
+            });
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(10)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('admin.users.partials._user_list', compact('users'))->render();
+        }
 
         return view('admin.users.index', compact('users'));
     }

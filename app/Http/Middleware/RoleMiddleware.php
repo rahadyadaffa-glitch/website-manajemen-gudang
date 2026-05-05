@@ -17,6 +17,10 @@ class RoleMiddleware
             return redirect('/login');
         }
 
+        if (auth()->user()->role?->name === 'superadmin') {
+            return $next($request);
+        }
+
         if (auth()->user()->role?->name !== $role) {
             abort(403, 'Unauthorized action.');
         }

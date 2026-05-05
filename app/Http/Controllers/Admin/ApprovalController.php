@@ -15,7 +15,7 @@ class ApprovalController extends Controller
         $minimarket = auth()->user()->minimarket;
         $pending_transactions = InventoryTransaction::where('minimarket_id', $minimarket->id)
             ->where('status', 'pending')
-            ->with(['product', 'user'])
+            ->with(['productVariant.product', 'user'])
             ->latest()
             ->paginate(15);
 
@@ -40,7 +40,7 @@ class ApprovalController extends Controller
 
             // 2. Update Inventory
             $inventory = InventoryItem::firstOrCreate(
-                ['minimarket_id' => $transaction->minimarket_id, 'product_id' => $transaction->product_id],
+                ['minimarket_id' => $transaction->minimarket_id, 'product_variant_id' => $transaction->product_variant_id],
                 ['quantity' => 0, 'last_updated' => now()]
             );
 

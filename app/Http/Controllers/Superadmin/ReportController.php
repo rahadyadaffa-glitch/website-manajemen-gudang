@@ -15,14 +15,14 @@ class ReportController extends Controller
 
         $minimarkets = Minimarket::withCount(['inventoryItems' => function ($query) use ($category_id) {
             if ($category_id) {
-                $query->whereHas('product', function ($q) use ($category_id) {
+                $query->whereHas('productVariant.product', function ($q) use ($category_id) {
                     $q->where('category_id', $category_id);
                 });
             }
         }])
         ->withSum(['inventoryItems as total_quantity' => function ($query) use ($category_id) {
             if ($category_id) {
-                $query->whereHas('product', function ($q) use ($category_id) {
+                $query->whereHas('productVariant.product', function ($q) use ($category_id) {
                     $q->where('category_id', $category_id);
                 });
             }
@@ -32,7 +32,7 @@ class ReportController extends Controller
                 $query->whereDate('created_at', $date);
             }
             if ($category_id) {
-                $query->whereHas('product', function ($q) use ($category_id) {
+                $query->whereHas('productVariant.product', function ($q) use ($category_id) {
                     $q->where('category_id', $category_id);
                 });
             }
@@ -51,7 +51,7 @@ class ReportController extends Controller
                     ->where('created_at', '>', \Carbon\Carbon::parse($date)->endOfDay());
                 
                 if ($category_id) {
-                    $futureTransactions->whereHas('product', function ($q) use ($category_id) {
+                    $futureTransactions->whereHas('productVariant.product', function ($q) use ($category_id) {
                         $q->where('category_id', $category_id);
                     });
                 }
@@ -67,7 +67,7 @@ class ReportController extends Controller
             }
             
             if ($category_id) {
-                $trxQuery->whereHas('product', function ($q) use ($category_id) {
+                $trxQuery->whereHas('productVariant.product', function ($q) use ($category_id) {
                     $q->where('category_id', $category_id);
                 });
             }

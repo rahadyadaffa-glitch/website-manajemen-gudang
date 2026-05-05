@@ -24,13 +24,15 @@ class DashboardController extends Controller
         $queryIn = InventoryTransaction::where('inventory_transactions.minimarket_id', $minimarket->id)
             ->where('inventory_transactions.transaction_type', 'in')
             ->where('inventory_transactions.status', 'approved')
-            ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+            ->join('product_variants', 'inventory_transactions.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id');
 
         $queryOut = InventoryTransaction::where('inventory_transactions.minimarket_id', $minimarket->id)
             ->where('inventory_transactions.transaction_type', 'out')
             ->where('inventory_transactions.status', 'approved')
-            ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+            ->join('product_variants', 'inventory_transactions.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id');
 
         if ($date) {
@@ -59,7 +61,7 @@ class DashboardController extends Controller
         ];
 
         $recent_transactions = InventoryTransaction::where('minimarket_id', $minimarket->id)
-            ->with(['product', 'user'])
+            ->with(['productVariant.product', 'user'])
             ->latest()
             ->take(5)
             ->get();
@@ -76,14 +78,16 @@ class DashboardController extends Controller
                 ->where('inventory_transactions.transaction_type', 'in')
                 ->where('inventory_transactions.status', 'approved')
                 ->whereDate('inventory_transactions.created_at', $currentDate)
-                ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+                ->join('product_variants', 'inventory_transactions.product_variant_id', '=', 'product_variants.id')
+                ->join('products', 'product_variants.product_id', '=', 'products.id')
                 ->leftJoin('categories', 'products.category_id', '=', 'categories.id');
 
             $dayOutQuery = InventoryTransaction::where('inventory_transactions.minimarket_id', $minimarket->id)
                 ->where('inventory_transactions.transaction_type', 'out')
                 ->where('inventory_transactions.status', 'approved')
                 ->whereDate('inventory_transactions.created_at', $currentDate)
-                ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+                ->join('product_variants', 'inventory_transactions.product_variant_id', '=', 'product_variants.id')
+                ->join('products', 'product_variants.product_id', '=', 'products.id')
                 ->leftJoin('categories', 'products.category_id', '=', 'categories.id');
 
             if ($request->filled('category_id')) {

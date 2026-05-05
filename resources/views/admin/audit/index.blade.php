@@ -1,130 +1,137 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h2 class="text-3xl font-black text-gray-900 leading-tight uppercase tracking-tight">
-                    Audit Trail
-                </h2>
-                <p class="text-sm text-gray-500 font-medium mt-1 italic">Rekapitulasi lengkap aktivitas gudang & minimarket</p>
-            </div>
-            
-            <div class="flex items-center space-x-2">
-                <div class="flex items-center bg-gray-100 p-1 rounded-xl shadow-inner">
-                    <button onclick="updateDateFilter('')" 
-                       class="date-filter-btn px-4 py-2 text-xs font-bold rounded-lg transition-all {{ !request('date') ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}"
-                       data-date="">
-                        Semua
-                    </button>
-                    <button onclick="updateDateFilter('{{ now()->toDateString() }}')" 
-                       class="date-filter-btn px-4 py-2 text-xs font-bold rounded-lg transition-all {{ request('date') == now()->toDateString() ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}"
-                       data-date="{{ now()->toDateString() }}">
-                        Hari Ini
-                    </button>
-                </div>
-                
-                <div onclick="document.getElementById('date-input').showPicker()"
-                    class="relative flex items-center bg-gray-100 px-4 py-2 rounded-xl hover:bg-white hover:shadow-sm transition-all cursor-pointer border border-transparent hover:border-blue-100 {{ request('date') && request('date') != now()->toDateString() ? 'ring-2 ring-blue-500 bg-blue-50' : '' }}">
-                    <input type="date" id="date-input" name="date" value="{{ request('date') }}" onchange="updateDateFilter(this.value)"
-                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-500 mr-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span id="date-label" class="text-xs font-bold pointer-events-none {{ request('date') && request('date') != now()->toDateString() ? 'text-blue-600' : 'text-gray-600' }}">
-                        {{ request('date') && request('date') != now()->toDateString() ? \Carbon\Carbon::parse(request('date'))->format('d M Y') : 'Custom' }}
-                    </span>
-                </div>
+    <!-- Page Header -->
+    <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b-4 border-surface-variant mb-6">
+        <div>
+            <h1 class="font-headline-lg text-headline-lg text-amber-500 uppercase">Audit Trail</h1>
+            <p class="text-on-surface-variant mt-2 border-l-4 border-amber-500 pl-4 bg-surface-container-high/50 py-2 w-fit">
+                Rekapitulasi lengkap aktivitas gudang & minimarket
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="updateDateFilter('')"
+                class="date-filter-btn pixel-btn px-4 py-2 font-label-sm text-xs uppercase {{ !request('date') ? 'bg-primary text-stone-950' : 'bg-surface-container text-on-surface-variant' }}"
+                data-date="">
+                Semua
+            </button>
+            <button onclick="updateDateFilter('{{ now()->toDateString() }}')"
+                class="date-filter-btn pixel-btn px-4 py-2 font-label-sm text-xs uppercase {{ request('date') == now()->toDateString() ? 'bg-primary text-stone-950' : 'bg-surface-container text-on-surface-variant' }}"
+                data-date="{{ now()->toDateString() }}">
+                Hari Ini
+            </button>
+            <div onclick="document.getElementById('date-input').showPicker()"
+                class="relative pixel-btn bg-surface-container text-on-surface-variant px-4 py-2 font-label-sm text-xs uppercase cursor-pointer {{ request('date') && request('date') != now()->toDateString() ? 'ring-2 ring-primary bg-primary text-stone-950' : '' }}">
+                <input type="date" id="date-input" name="date" value="{{ request('date') }}"
+                    onchange="updateDateFilter(this.value)"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer pointer-events-none">
+                <span id="date-label">
+                    {{ request('date') && request('date') != now()->toDateString() ? \Carbon\Carbon::parse(request('date'))->format('d M Y') : 'Custom' }}
+                </span>
             </div>
         </div>
-    </x-slot>
+    </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/30">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div class="flex flex-wrap items-center gap-3">
-                    <!-- Search Input -->
-                    <div class="relative flex-1 min-w-[200px]">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="search-input" value="{{ request('search') }}" oninput="fetchLogs()"
-                            class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs font-black uppercase" 
-                            placeholder="Cari SKU atau Nama Produk...">
-                    </div>
+    <!-- Filters & Search -->
+    <div class="bg-surface-container pixel-border p-4 flex flex-col lg:flex-row gap-4 mb-6">
+        <div class="flex-1 relative">
+            <span
+                class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+            <input type="text" id="search-input" value="{{ request('search') }}" oninput="fetchLogs()"
+                class="w-full bg-background border-2 border-outline-variant text-on-surface pl-10 pr-4 py-2 focus:outline-none focus:border-amber-500 focus:ring-0 pixel-border font-body-lg text-sm"
+                placeholder="Cari SKU atau Nama Produk..." />
+        </div>
+        <div class="flex flex-wrap gap-4">
+            <select id="parent-category-filter" onchange="handleParentChange()"
+                class="bg-background border-2 border-outline-variant text-on-surface px-4 py-2 focus:outline-none focus:border-amber-500 pixel-border font-label-sm text-xs uppercase min-w-[160px]">
+                <option value="">SEMUA KATEGORI</option>
+                @foreach($categories as $parent)
+                    <option value="{{ $parent->id }}" {{ request('parent_category_id') == $parent->id ? 'selected' : '' }}>
+                        {{ strtoupper($parent->name) }}
+                    </option>
+                @endforeach
+            </select>
 
-                    <!-- Tiered Category Filter -->
-                    <select id="parent-category-filter" onchange="handleParentChange()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px] select2">
-                        <option value="">SEMUA KATEGORI</option>
-                        @foreach($categories as $parent)
-                            <option value="{{ $parent->id }}" {{ request('parent_category_id') == $parent->id ? 'selected' : '' }}>
-                                {{ strtoupper($parent->name) }}
+            <select id="sub-category-filter" onchange="fetchLogs()"
+                class="bg-background border-2 border-outline-variant text-on-surface px-4 py-2 focus:outline-none focus:border-amber-500 pixel-border font-label-sm text-xs uppercase min-w-[160px]">
+                <option value="">SEMUA SUB-KATEGORI</option>
+                @if(request('parent_category_id'))
+                    @php $selParent = $categories->firstWhere('id', request('parent_category_id')); @endphp
+                    @if($selParent)
+                        @foreach($selParent->children as $child)
+                            <option value="{{ $child->id }}" {{ request('category_id') == $child->id ? 'selected' : '' }}>
+                                {{ strtoupper($child->name) }}
                             </option>
                         @endforeach
-                    </select>
+                    @endif
+                @endif
+            </select>
 
-                    <select id="sub-category-filter" onchange="fetchLogs()" 
-                        class="bg-white border border-gray-200 pl-4 pr-10 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm min-w-[160px] select2">
-                        <option value="">SEMUA SUB-KATEGORI</option>
-                        @if(request('parent_category_id'))
-                            @php $selParent = $categories->firstWhere('id', request('parent_category_id')); @endphp
-                            @if($selParent)
-                                @foreach($selParent->children as $child)
-                                    <option value="{{ $child->id }}" {{ request('category_id') == $child->id ? 'selected' : '' }}>
-                                        {{ strtoupper($child->name) }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        @endif
-                    </select>
-
-                    <!-- Time Filters -->
-                    <div class="flex items-center gap-2">
-                        <input type="time" id="time-start" value="{{ request('time_start') }}" onchange="fetchLogs()"
-                            class="bg-white border border-gray-200 px-3 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500">
-                        <span class="text-gray-400 text-xs font-bold">s/d</span>
-                        <input type="time" id="time-end" value="{{ request('time_end') }}" onchange="fetchLogs()"
-                            class="bg-white border border-gray-200 px-3 py-2 rounded-xl text-xs font-black text-gray-700 focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <div id="loading-spinner" class="hidden">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>
+            <div class="flex items-center gap-2">
+                <input type="time" id="time-start" value="{{ request('time_start') }}" onchange="fetchLogs()"
+                    class="bg-background border-2 border-outline-variant text-on-surface px-3 py-2 focus:outline-none focus:border-amber-500 pixel-border font-label-sm text-xs uppercase">
+                <span class="text-on-surface-variant text-xs font-black uppercase">s/d</span>
+                <input type="time" id="time-end" value="{{ request('time_end') }}" onchange="fetchLogs()"
+                    class="bg-background border-2 border-outline-variant text-on-surface px-3 py-2 focus:outline-none focus:border-amber-500 pixel-border font-label-sm text-xs uppercase">
             </div>
         </div>
+    </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                    <tr>
-                        <th class="px-6 py-4">Waktu Kejadian</th>
-                        <th class="px-6 py-4">Detail Produk</th>
-                        <th class="px-6 py-4">Kategori</th>
-                        <th class="px-6 py-4">Petugas</th>
-                        <th class="px-6 py-4 text-center">Aktivitas</th>
-                        <th class="px-6 py-4 text-right">Jumlah</th>
-                        <th class="px-6 py-4">Catatan</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="logs-table-body" class="divide-y divide-gray-50">
-                    @include('admin.audit._table_body')
-                </tbody>
-            </table>
+    <!-- Audit Grid -->
+    <div class="space-y-4">
+        <!-- Table Header (hidden on mobile) -->
+        <div class="hidden md:grid grid-cols-12 gap-4 px-8 py-4 text-on-surface-variant font-label-sm text-xs uppercase tracking-widest bg-stone-900/50 pixel-border border-b-2 border-outline-variant mb-2">
+            <div class="col-span-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">schedule</span>
+                WAKTU
+            </div>
+            <div class="col-span-3">PRODUK / SKU</div>
+            <div class="col-span-2 text-center">CABANG & USER</div>
+            <div class="col-span-2 text-center">AKTIVITAS</div>
+            <div class="col-span-1 text-right">JUMLAH</div>
+            <div class="col-span-2 text-center">STATUS</div>
         </div>
-        
+
+        <div id="logs-table-body" class="space-y-3 relative min-h-[200px]">
+            @include('admin.audit._table_body')
+        </div>
+
+        <div id="loading-spinner" class="hidden flex justify-center py-12">
+            <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
         @if($logs->hasPages())
-            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <div class="mt-8">
                 {{ $logs->links() }}
             </div>
         @endif
     </div>
 
+    <style>
+        .audit-card {
+            background: rgba(31, 32, 32, 0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid #383939;
+            box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .audit-card:hover {
+            border-color: #f59e0b;
+            background: rgba(41, 42, 42, 0.9);
+        }
+
+        select.pixel-border {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    </style>
+
+    @push('scripts')
     <script>
         const categoryData = @json($categories);
         let currentFilters = {
@@ -145,7 +152,7 @@
 
             subSelect.innerHTML = '<option value="">SEMUA SUB-KATEGORI</option>';
             if (parentId) {
-                const parent = categoryData.find(c => c.id === parentId);
+                const parent = categoryData.find(c => c.id == parentId);
                 if (parent && parent.children) {
                     parent.children.forEach(child => {
                         const opt = document.createElement('option');
@@ -156,32 +163,37 @@
                 }
             }
 
-            // Refresh Select2 for sub-category
-            if(typeof jQuery !== 'undefined' && jQuery(subSelect).hasClass('select2-hidden-accessible')) {
-                jQuery(subSelect).trigger('change');
-            }
-
             fetchLogs();
         }
-
-        // Initialize Select2 on load
-        document.addEventListener('DOMContentLoaded', () => {
-            if(typeof jQuery !== 'undefined') {
-                $('.select2').select2({
-                    width: 'resolve'
-                });
-            }
-        });
 
         function updateDateFilter(date) {
             currentFilters.date = date;
             document.getElementById('date-input').value = date;
+            
+            document.querySelectorAll('.date-filter-btn').forEach(btn => {
+                if (btn.dataset.date === date) {
+                    btn.classList.add('bg-primary', 'text-stone-950');
+                    btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-stone-950');
+                    btn.classList.add('bg-surface-container', 'text-on-surface-variant');
+                }
+            });
+
+            const label = document.getElementById('date-label');
+            if (date && date !== '{{ now()->toDateString() }}') {
+                const d = new Date(date);
+                label.innerText = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            } else {
+                label.innerText = 'Custom';
+            }
+
             fetchLogs();
         }
 
         function fetchLogs() {
             const spinner = document.getElementById('loading-spinner');
-            const tbody = document.getElementById('logs-table-body');
+            const container = document.getElementById('logs-table-body');
             
             currentFilters.search = document.getElementById('search-input').value;
             currentFilters.time_start = document.getElementById('time-start').value;
@@ -196,10 +208,11 @@
             })
             .then(response => response.text())
             .then(html => {
-                tbody.innerHTML = html;
+                container.innerHTML = html;
                 spinner.classList.add('hidden');
                 window.history.replaceState(null, '', `?${params.toString()}`);
             });
         }
     </script>
+    @endpush
 </x-app-layout>

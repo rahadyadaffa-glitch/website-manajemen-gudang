@@ -76,18 +76,24 @@ class MinimarketController extends Controller
             'recent_out' => (clone $query)->where('transaction_type', 'out')->sum('quantity'),
         ];
 
-        $inventoryQuery = $minimarket->inventoryItems()->with('product.category');
+        $inventoryQuery = $minimarket->inventoryItems()->with('productVariant.product.category');
 
         if ($request->filled('search')) {
-            $inventoryQuery->whereHas('product', function ($q) use ($request) {
+            $inventoryQuery->whereHas('productVariant.product', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('sku', 'like', '%' . $request->search . '%');
             });
         }
 
         if ($request->filled('category_id')) {
-            $inventoryQuery->whereHas('product', function ($q) use ($request) {
+            $inventoryQuery->whereHas('productVariant.product', function ($q) use ($request) {
                 $q->where('category_id', $request->category_id);
+            });
+        }
+
+        if ($request->filled('parent_category_id') && !$request->filled('category_id')) {
+            $inventoryQuery->whereHas('productVariant.product.category', function ($q) use ($request) {
+                $q->where('parent_id', $request->parent_category_id);
             });
         }
 
@@ -98,7 +104,7 @@ class MinimarketController extends Controller
             $date = $request->date;
             foreach ($inventory as $item) {
                 $futureTransactions = $minimarket->inventoryTransactions()
-                    ->where('product_id', $item->product_id)
+                    ->where('product_variant_id', $item->product_variant_id)
                     ->where('created_at', '>', \Carbon\Carbon::parse($date)->endOfDay());
                 
                 $inSinceDate = (clone $futureTransactions)->where('transaction_type', 'in')->sum('quantity');
@@ -122,10 +128,60 @@ class MinimarketController extends Controller
             return view('superadmin.minimarkets.partials._inventory_table', compact('inventory'))->render();
         }
 
-        $transactions = $query->with(['product', 'user'])->latest()->take(10)->get();
-        $categories = \App\Models\Category::all();
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
 
-        return view('superadmin.minimarkets.show', compact('minimarket', 'stats', 'inventory', 'transactions', 'categories'));
+        return view('superadmin.minimarkets.show', compact('minimarket', 'stats', 'inventory', 'categories'));
+    }
+
+    public function transactions(Request $request, Minimarket $minimarket)
+    {
+        $date = $request->date;
+        $query = $minimarket->inventoryTransactions()->with(['productVariant.product', 'user']);
+        
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('transaction_type', $request->type);
+        }
+
+        if ($request->filled('search')) {
+            $query->whereHas('productVariant.product', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('sku', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('productVariant.product', function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            });
+        }
+
+        if ($request->filled('parent_category_id') && !$request->filled('category_id')) {
+            $query->whereHas('productVariant.product.category', function ($q) use ($request) {
+                $q->where('parent_id', $request->parent_category_id);
+            });
+        }
+
+        // Stats specific to this minimarket
+        $stats = [
+            'total_products' => $minimarket->inventoryItems()->count(),
+            'total_stock' => $minimarket->inventoryItems()->sum('quantity'),
+            'recent_in' => $minimarket->inventoryTransactions()->where('transaction_type', 'in')->when($date, fn($q) => $q->whereDate('created_at', $date))->sum('quantity'),
+            'recent_out' => $minimarket->inventoryTransactions()->where('transaction_type', 'out')->when($date, fn($q) => $q->whereDate('created_at', $date))->sum('quantity'),
+        ];
+
+        $transactions = $query->latest()->paginate(15)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('superadmin.minimarkets.partials._transaction_table', compact('transactions'))->render();
+        }
+
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->orderBy('name')->get();
+
+        return view('superadmin.minimarkets.transactions', compact('minimarket', 'stats', 'transactions', 'categories'));
     }
 
     public function trend(Request $request, Minimarket $minimarket)
@@ -156,7 +212,7 @@ class MinimarketController extends Controller
             $stats['total_stock'] = $stats['total_stock'] - $allInSince + $allOutSince;
         }
 
-        $transactions = $query->with(['product', 'user'])->latest()->take(10)->get();
+        $transactions = $query->with(['productVariant.product', 'user'])->latest()->take(10)->get();
 
         // Calculate 30-day trend data for THIS minimarket
         $chart_data = ['labels' => [], 'in' => [], 'out' => []];

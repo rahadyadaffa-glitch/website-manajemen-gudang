@@ -1,91 +1,96 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h2 class="text-3xl font-black text-gray-900 leading-tight">
-                    KELOLA USER GUDANG
-                </h2>
-                <p class="text-sm text-gray-500 font-medium mt-1">Kelola akses petugas gudang di cabang {{ auth()->user()->minimarket->name }}</p>
-            </div>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white text-xs font-black rounded-xl hover:bg-blue-700 transition-all shadow-sm uppercase tracking-widest">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Tambah Petugas
-            </a>
+    <!-- Page Header -->
+    <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b-4 border-surface-variant mb-6">
+        <div>
+            <h1 class="font-headline-lg text-headline-lg text-amber-500 uppercase">KELOLA USER GUDANG</h1>
+            <p class="text-on-surface-variant mt-2 border-l-4 border-amber-500 pl-4 bg-surface-container-high/50 py-2 w-fit italic uppercase text-xs font-black">
+                Kelola akses petugas gudang di cabang {{ auth()->user()->minimarket->name }}
+            </p>
         </div>
-    </x-slot>
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-200 bg-gray-50/30">
-            <h3 class="text-base font-black text-gray-900 uppercase tracking-tight">Daftar Petugas Gudang</h3>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                    <tr>
-                        <th class="px-6 py-4">Nama Lengkap</th>
-                        <th class="px-6 py-4">Username / Email</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($users as $user)
-                        <tr class="hover:bg-gray-50/50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-xs mr-3">
-                                        {{ substr($user->name, 0, 1) }}
-                                    </div>
-                                    <p class="text-sm font-bold text-gray-900">{{ $user->name }}</p>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="text-xs font-bold text-gray-700">{{ $user->username }}</p>
-                                <p class="text-xs text-gray-400">{{ $user->email }}</p>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($user->is_active)
-                                    <span class="px-3 py-1 bg-green-50 text-green-600 text-xs font-black rounded-lg uppercase">Aktif</span>
-                                @else
-                                    <span class="px-3 py-1 bg-red-50 text-red-600 text-xs font-black rounded-lg uppercase">Nonaktif</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all border border-transparent hover:border-blue-100">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </a>
-                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan petugas ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-gray-400 italic text-sm">
-                                Belum ada petugas gudang yang terdaftar.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($users->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-                {{ $users->links() }}
-            </div>
-        @endif
+        <a href="{{ route('admin.users.create') }}"
+            class="pixel-btn bg-amber-500 hover:bg-amber-400 text-stone-900 px-5 py-2.5 font-label-sm text-xs font-black uppercase flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">person_add</span>
+            Tambah Petugas
+        </a>
     </div>
+
+    <!-- AJAX Search Bar -->
+    <div class="bg-surface-container pixel-border p-4 mb-6">
+        <div class="flex items-center bg-stone-950 pixel-input focus-within:ring-2 focus-within:ring-amber-500/50 transition-all group overflow-hidden">
+            <span class="material-symbols-outlined pl-4 text-on-surface-variant group-focus-within:text-amber-500 pointer-events-none">search</span>
+            <input type="text" id="search-input" value="{{ request('search') }}"
+                class="w-full bg-transparent border-none text-on-surface pl-3 pr-4 py-3 focus:ring-0 font-black text-sm uppercase"
+                placeholder="Ketik untuk mencari nama, username, atau email petugas..." />
+        </div>
+    </div>
+
+    <!-- User List Container -->
+    <div id="user-container" class="relative min-h-[300px]">
+        <div id="loading-spinner" class="absolute inset-0 bg-stone-950/50 backdrop-blur-[1px] z-10 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+            <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <div id="user-list">
+            <!-- Table Header (hidden on mobile) -->
+            <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-2 text-on-surface-variant font-label-sm text-[10px] uppercase font-black tracking-widest bg-stone-900/50 mb-2">
+                <div class="col-span-4">NAMA LENGKAP</div>
+                <div class="col-span-4">USERNAME / EMAIL</div>
+                <div class="col-span-2 text-center">STATUS</div>
+                <div class="col-span-2 text-right">AKSI</div>
+            </div>
+
+            <div id="user-list-body">
+                @include('admin.users.partials._user_list', ['users' => $users])
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            const listBody = document.getElementById('user-list-body');
+            const spinner = document.getElementById('loading-spinner');
+            let debounceTimer;
+
+            const performFetch = (search = '', page = 1) => {
+                spinner.classList.remove('opacity-0', 'pointer-events-none');
+
+                const params = new URLSearchParams({ search, page });
+                fetch(`{{ route('admin.users.index') }}?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    listBody.innerHTML = html;
+                    spinner.classList.add('opacity-0', 'pointer-events-none');
+                    window.history.replaceState(null, '', `?${params.toString()}`);
+                })
+                .catch(error => {
+                    console.error('User fetch failed:', error);
+                    spinner.classList.add('opacity-0', 'pointer-events-none');
+                });
+            };
+
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    performFetch(searchInput.value);
+                }, 400);
+            });
+
+            // AJAX Pagination
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.ajax-pagination a')) {
+                    e.preventDefault();
+                    const url = new URL(e.target.closest('a').href);
+                    const page = url.searchParams.get('page');
+                    performFetch(searchInput.value, page);
+                    window.scrollTo({ top: document.getElementById('user-container').offsetTop - 100, behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

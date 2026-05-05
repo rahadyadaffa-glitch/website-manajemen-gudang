@@ -3,162 +3,123 @@
     $role = $user->role->name;
 @endphp
 
+<!-- SideNavBar (Shared Component) -->
 <aside id="sidebar"
-    class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
-    <div class="flex flex-col h-full">
-        <!-- Logo -->
-        <div class="flex items-center justify-between h-24 px-6 border-b border-gray-200 bg-white">
-            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-16 h-16 object-contain">
-                <span class="text-2xl font-black text-blue-600 tracking-tighter uppercase">WMS</span>
-            </a>
-            <button class="lg:hidden text-white hover:text-gray-200"
-                onclick="document.getElementById('sidebar').classList.add('-translate-x-full')">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 overflow-y-auto space-y-1">
-            <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Menu Utama</p>
-
-            <a href="{{ route('dashboard') }}"
-                class="flex items-center px-4 py-3 text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-400' }}"
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Dashboard
-            </a>
-
-            @if($role === 'superadmin')
-                <!-- Superadmin Links -->
-                <a href="{{ route('superadmin.minimarkets.index') }}"
-                    class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->routeIs('superadmin.minimarkets.*') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : '' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    <span class="font-medium">Kelola Minimarket</span>
-                </a>
-
-                <a href="{{ route('superadmin.admins.index') }}"
-                    class="flex items-center px-6 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->routeIs('superadmin.admins.*') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600' : '' }}">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <span class="font-medium">Kelola Admin</span>
-                </a>
-                <a href="{{ route('superadmin.reports.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('superadmin/reports*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('superadmin/reports*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 17v-2m3 2v-4m3 2v-6m10 10V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2z" />
-                    </svg>
-                    Laporan Konsolidasi
-                </a>
-                <a href="{{ route('superadmin.audit.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('superadmin/audit-logs*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('superadmin/audit-logs*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Audit Trail
-                </a>
-            @endif
-
-            @if($role === 'admin')
-                <!-- Admin Links -->
-                <a href="{{ route('admin.products.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/products*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/products*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    Kelola Produk
-                </a>
-                <a href="{{ route('admin.users.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/users*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/users*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Kelola User
-                </a>
-                <a href="{{ route('admin.approvals.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('admin/approvals*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('admin/approvals*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                    Approval Stok
-                </a>
-                <a href="{{ route('admin.audit.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->routeIs('admin.audit.index') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.audit.index') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Audit Trail
-                </a>
-            @endif
-
-            @if($role === 'user')
-                <!-- User Links -->
-                <a href="{{ route('user.input.masuk.create') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('user/input-barang-masuk*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('user/input-barang-masuk*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Input Barang Masuk
-                </a>
-                <a href="{{ route('user.input.keluar.create') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('user/input-barang-keluar*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('user/input-barang-keluar*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Input Barang Keluar
-                </a>
-                <a href="{{ route('user.history.index') }}"
-                    class="flex items-center px-4 py-3 text-sm font-medium {{ request()->is('user/history*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50' }} rounded-lg transition-colors">
-                    <svg class="w-5 h-5 mr-3 {{ request()->is('user/history*') ? 'text-blue-600' : 'text-gray-400' }}"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    History Transaksi
-                </a>
-            @endif
-        </nav>
-
-        <!-- User Info -->
-        <div class="p-4 border-t border-gray-200">
-            <div class="flex items-center p-3 bg-gray-50 rounded-xl">
-                <div
-                    class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                    {{ substr($user->name, 0, 1) }}
-                </div>
-                <div class="ml-3 overflow-hidden">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ $user->name }}</p>
-                    <p class="text-xs text-gray-500 truncate capitalize">{{ $role }}</p>
-                </div>
+    class="bg-stone-900 dark:bg-[#1a1a1a] h-screen w-80 border-r-4 border-stone-950 shadow-[inset_2px_0px_0px_#44403c] flex flex-col overflow-y-auto hidden md:flex shrink-0 sticky top-0 transition-transform duration-300 ease-in-out z-50">
+    <div class="p-6 border-b-4 border-black">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-amber-500 text-3xl" data-weight="fill">warehouse</span>
+            <div>
+                <h2 class="text-lg font-black text-amber-500 font-headline-md text-headline-md tracking-tight uppercase">
+                    Inventory</h2>
+                <p class="font-label-sm text-label-sm text-stone-400 uppercase">Voxel System v1.0</p>
             </div>
         </div>
+    </div>
+
+    <nav class="flex-1 py-4 px-2 space-y-2">
+        <!-- Dashboard Link -->
+        <a href="{{ route('dashboard') }}"
+            class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->routeIs('dashboard') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            Dashboard
+        </a>
+
+        @if($role === 'superadmin')
+            <!-- Superadmin Links -->
+            <a href="{{ route('superadmin.minimarkets.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->routeIs('superadmin.minimarkets.*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">store</span>
+                Manage Store
+            </a>
+
+            <a href="{{ route('superadmin.admins.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->routeIs('superadmin.admins.*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+                Manage Admin
+            </a>
+
+            <a href="{{ route('superadmin.products.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->routeIs('superadmin.products.*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Master Products
+            </a>
+
+            <a href="{{ route('superadmin.reports.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('superadmin/reports*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">analytics</span>
+                Reports
+            </a>
+
+            <a href="{{ route('superadmin.audit.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('superadmin/audit-logs*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">history</span>
+                Audit Trail
+            </a>
+        @endif
+
+        @if($role === 'admin')
+            <!-- Admin Links -->
+            <a href="{{ route('admin.products.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('admin/products*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Product List
+            </a>
+
+            <a href="{{ route('admin.users.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('admin/users*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">group</span>
+                Manage User
+            </a>
+
+            <a href="{{ route('admin.approvals.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('admin/approvals*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">fact_check</span>
+                Stock Approval
+            </a>
+
+            <a href="{{ route('admin.audit.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->routeIs('admin.audit.index') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">history</span>
+                Audit Trail
+            </a>
+        @endif
+
+        @if($role === 'user')
+            <!-- User Links -->
+            <a href="{{ route('user.inventory.create', ['type' => 'inputmasuk']) }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('user/inventory/create*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">inventory</span>
+                Input Barang
+            </a>
+            <a href="{{ route('user.history.index') }}"
+                class="flex items-center gap-3 p-3 font-bold text-sm uppercase transition-transform hover:scale-[1.02] active:translate-x-1 active:translate-y-1 {{ request()->is('user/history*') ? 'bg-amber-500 text-stone-950 border-2 border-t-white/30 border-l-white/30 border-b-black/40 border-r-black/40' : 'text-stone-400 hover:bg-stone-800' }}">
+                <span class="material-symbols-outlined">history</span>
+                History
+            </a>
+        @endif
+    </nav>
+
+    <div class="p-4 border-t-4 border-black">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 pixel-box bg-amber-500 flex items-center justify-center text-stone-950 font-black">
+                {{ substr($user->name, 0, 1) }}
+            </div>
+            <div class="flex flex-col">
+                <span class="font-bold text-base text-stone-200 truncate max-w-[140px]">{{ $user->name }}</span>
+                <span class="font-label-sm text-xs uppercase text-stone-500">{{ $role }}</span>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('logout') }}" class="mt-4">
+            @csrf
+            <button type="submit" class="w-full text-left text-red-400 hover:text-red-300 font-bold text-xs uppercase flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">logout</span>
+                Sign Out
+            </button>
+        </form>
     </div>
 </aside>
 
 <!-- Mobile Overlay -->
-<div id="sidebar-overlay" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-50 lg:hidden hidden"
-    onclick="document.getElementById('sidebar').classList.add('-translate-x-full'); this.classList.add('hidden')"></div>
+<div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black/60 md:hidden hidden"
+    onclick="document.getElementById('sidebar').classList.add('hidden'); this.classList.add('hidden')"></div>

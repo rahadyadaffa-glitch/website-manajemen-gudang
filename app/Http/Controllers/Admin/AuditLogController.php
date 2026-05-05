@@ -13,10 +13,11 @@ class AuditLogController extends Controller
         $minimarket = auth()->user()->minimarket;
         
         $query = InventoryTransaction::where('inventory_transactions.minimarket_id', $minimarket->id)
-            ->join('products', 'inventory_transactions.product_id', '=', 'products.id')
+            ->join('product_variants', 'inventory_transactions.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
             ->select('inventory_transactions.*')
-            ->with(['product', 'user']);
+            ->with(['productVariant.product', 'user']);
 
         if ($request->filled('date')) {
             $query->whereDate('inventory_transactions.created_at', $request->date);
@@ -40,7 +41,7 @@ class AuditLogController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('products.name', 'like', "%{$search}%")
-                  ->orWhere('products.sku', 'like', "%{$search}%");
+                  ->orWhere('product_variants.sku', 'like', "%{$search}%");
             });
         }
 

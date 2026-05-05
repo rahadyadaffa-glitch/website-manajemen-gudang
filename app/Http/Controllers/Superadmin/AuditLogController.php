@@ -10,7 +10,7 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = InventoryTransaction::with(['minimarket', 'product', 'user']);
+        $query = InventoryTransaction::with(['minimarket', 'productVariant.product', 'user']);
 
         if ($request->filled('minimarket_id')) {
             $query->where('minimarket_id', $request->minimarket_id);
@@ -29,6 +29,11 @@ class AuditLogController extends Controller
         }
 
         $logs = $query->latest()->paginate(20)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('superadmin.audit.partials._audit_table', compact('logs'))->render();
+        }
+
         $minimarkets = \App\Models\Minimarket::all();
 
         return view('superadmin.audit.index', compact('logs', 'minimarkets'));
